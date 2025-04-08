@@ -42,12 +42,14 @@ func main() {
 	if source, err = so.ReadFeatureDef(sourcePath); err != nil {
 		log.Fatal(err)
 	}
+	so.AddDefaultGroup(source)
 	if compose, err = so.ReadFeatureDef(composePath); err != nil {
 		log.Fatal(err)
 	}
 	methodsPath := fmt.Sprintf("%s_methods.txt", destPath)
 	methods := bytes.NewBuffer([]byte{})
 	fields := so.GetFields(compose)
+	composeExternalName := compose.Map["external_name"].(string)
 	for _, f := range fields {
 		fieldName := f["name"]
 		featureName := f["feature_name"]
@@ -57,7 +59,7 @@ func main() {
 		methods.WriteString(method)
 		fieldsNames = append(fieldsNames, calcFieldName)
 	}
-	so.AddGroup(source, compose.Map["name"].(string), fieldsNames)
+	so.AddGroup(source, composeExternalName, fieldsNames)
 	so.WriteFeatureDef(destPath, source)
 	file, err := os.OpenFile(methodsPath, os.O_APPEND|os.O_WRONLY, 0644)
 	if os.IsNotExist(err){

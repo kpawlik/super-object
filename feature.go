@@ -27,13 +27,31 @@ func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, 
 	featureDef.Set("fields", fields)
 }
 
+func AddDefaultGroup(featureDef *om.OrderedMap) {
+	groups := featureDef.Map["groups"].([]any)
+	if (len(groups) == 0) {
+		defaultFields := GetFields(featureDef)
+		fieldNames := make([]string, len(defaultFields))
+		for i, field := range defaultFields {
+			fieldNames[i] = field["name"]
+		}
+		defaultGroup := om.NewOrderedMap()
+		defaultGroup.Set("name", "Default"	)
+		defaultGroup.Set("visible", true)
+		defaultGroup.Set("expanded", false)
+		defaultGroup.Set("fields", fieldNames)
+		groups = append(groups, defaultGroup)
+		featureDef.Set("groups", groups)
+	}
+}
+
 func AddGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
+	groups := featureDef.Map["groups"].([]any)
 	group := om.NewOrderedMap()
 	group.Set("name", groupName)
 	group.Set("visible", true)
 	group.Set("expanded", false)
 	group.Set("fields", fields)
-	groups := featureDef.Map["groups"].([]any)
 	groups = append(groups, group)
 	featureDef.Set("groups", groups)
 }
