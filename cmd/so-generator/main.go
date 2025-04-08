@@ -55,7 +55,7 @@ func main() {
 		so.AddField(source, calcFieldName, f["external_name"], f["type"])
 		method := so.GetMethodBody(calcFieldName, featureName, fieldName)
 		methods.WriteString(method)
-		fieldsNames = append(fieldsNames, fieldName)
+		fieldsNames = append(fieldsNames, calcFieldName)
 	}
 	so.AddGroup(source, compose.Map["name"].(string), fieldsNames)
 	so.WriteFeatureDef(destPath, source)
