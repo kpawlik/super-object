@@ -33,6 +33,7 @@ func main() {
 		err error
 		source *om.OrderedMap
 		compose *om.OrderedMap
+		fieldsNames = []string{}
 
 	)
 	sourcePath := flag.CommandLine.Lookup("source").Value.String()
@@ -48,11 +49,15 @@ func main() {
 	methods := bytes.NewBuffer([]byte{})
 	fields := so.GetFields(compose)
 	for _, f := range fields {
-		calcFieldName := fmt.Sprintf("calc__%s__%s", f["feature_name"], f["name"])
+		fieldName := f["name"]
+		featureName := f["feature_name"]
+		calcFieldName := fmt.Sprintf("calc__%s__%s", featureName, fieldName)
 		so.AddField(source, calcFieldName, f["external_name"], f["type"])
-		method := so.GetMethodBody(calcFieldName, f["feature_name"], f["name"])
+		method := so.GetMethodBody(calcFieldName, featureName, fieldName)
 		methods.WriteString(method)
+		fieldsNames = append(fieldsNames, fieldName)
 	}
+	so.AddGroup(source, compose.Map["name"].(string), fieldsNames)
 	so.WriteFeatureDef(destPath, source)
 	file, err := os.OpenFile(methodsPath, os.O_APPEND|os.O_WRONLY, 0644)
 	if os.IsNotExist(err){
@@ -62,5 +67,5 @@ func main() {
 		file.Close()
 	}
 	log.Printf("Methods written to %s", methodsPath)
-	log.Printf("Superobject written to %s", destPath)	
+	log.Printf("Superobject written to %s", destPath)
 }

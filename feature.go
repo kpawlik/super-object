@@ -27,6 +27,17 @@ func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, 
 	featureDef.Set("fields", fields)
 }
 
+func AddGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
+	group := om.NewOrderedMap()
+	group.Set("name", groupName)
+	group.Set("visible", true)
+	group.Set("expanded", false)
+	group.Set("fields", fields)
+	groups := featureDef.Map["groups"].([]any)
+	groups = append(groups, group)
+	featureDef.Set("groups", groups)
+}
+
 // Get list of fields from feature definition. Exclude fields with prefix "myw_"
 // and fields with type "reference_set", "reference", "linestring", "point", "polygon"
 func GetFields(featureDef *om.OrderedMap) (fields []map[string]string) {
