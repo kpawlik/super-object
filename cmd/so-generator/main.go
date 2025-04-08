@@ -11,6 +11,7 @@ import (
 	so "github.com/kpawlik/superobject"
 )
 
+
 func init() {
 	var(
 		soSource string
@@ -48,7 +49,7 @@ func main() {
 	}
 	methodsPath := fmt.Sprintf("%s_methods.txt", destPath)
 	methods := bytes.NewBuffer([]byte{})
-	fields := so.GetFields(compose)
+	fields := so.GetFields(compose, nil)
 	composeExternalName := compose.Map["external_name"].(string)
 	for _, f := range fields {
 		fieldName := f["name"]

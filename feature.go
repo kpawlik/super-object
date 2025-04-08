@@ -11,6 +11,12 @@ import (
 	"github.com/kpawlik/om"
 )
 
+
+var (
+	defaultExcluded = []string{"reference_set", "reference", "linestring", "point", "polygon"}
+	geomExcluded = []string{"linestring", "point", "polygon"}
+)
+
 // AddField adds a new field to the feature definition
 // featureDef: the feature definition to add the field to
 // fieldName: the name of the field to add
@@ -30,7 +36,7 @@ func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, 
 func AddDefaultGroup(featureDef *om.OrderedMap) {
 	groups := featureDef.Map["groups"].([]any)
 	if (len(groups) == 0) {
-		defaultFields := GetFields(featureDef)
+		defaultFields := GetFields(featureDef, geomExcluded)
 		fieldNames := make([]string, len(defaultFields))
 		for i, field := range defaultFields {
 			fieldNames[i] = field["name"]
@@ -58,7 +64,10 @@ func AddGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
 
 // Get list of fields from feature definition. Exclude fields with prefix "myw_"
 // and fields with type "reference_set", "reference", "linestring", "point", "polygon"
-func GetFields(featureDef *om.OrderedMap) (fields []map[string]string) {
+func GetFields(featureDef *om.OrderedMap, excluded []string) (fields []map[string]string) {
+	if excluded == nil{
+		excluded = defaultExcluded
+	}
 	featureName := featureDef.Map["name"].(string)
 	fieldsDefs := featureDef.Map["fields"].([]any)
 	fields = make([]map[string]string, 0)
@@ -70,7 +79,7 @@ func GetFields(featureDef *om.OrderedMap) (fields []map[string]string) {
 		}
 		externalName := field.Map["external_name"].(string)
 		fieldType := field.Map["type"].(string)
-		if slices.Contains([]string{"reference_set", "reference", "linestring", "point", "polygon"}, fieldType) {
+		if slices.Contains(excluded, fieldType) {
 			continue
 		}
 		fields = append(fields, map[string]string{
