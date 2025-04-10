@@ -1,12 +1,14 @@
 package superobject
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"slices"
 	"strings"
+	"text/template"
 
 	"github.com/kpawlik/om"
 )
@@ -15,7 +17,27 @@ import (
 var (
 	defaultExcluded = []string{"reference_set", "reference", "linestring", "point", "polygon"}
 	geomExcluded = []string{"linestring", "point", "polygon"}
+	methodTemplateText = `
+	/**
+	 Method for calculated field. 
+	 @returns {any} value of field {{.FieldName}} from feature {{.FeatureName}}
+	 */
+    async {{.MethodName}}(){
+        return await this.getSuperObjectFieldValue("{{.FeatureName}}", "{{.FieldName}}");
+    }
+`
+	methodTemplate = template.New("methodTemplate")
 )
+
+type Method struct {
+	MethodName  string
+	FeatureName string
+	FieldName   string
+}
+
+func init(){
+	methodTemplate = template.Must(methodTemplate.Parse(methodTemplateText))
+}
 
 // AddField adds a new field to the feature definition
 // featureDef: the feature definition to add the field to
@@ -93,15 +115,18 @@ func GetFields(featureDef *om.OrderedMap, excluded []string) (fields []map[strin
 }
 
 // Reads the feature definition from a file
-func ReadFeatureDef(path string) (feature *om.OrderedMap, err error){
+func ReadFeatureDef(reader *bufio.Reader) (feature *om.OrderedMap, err error){
 	var (
 		buff []byte
 	)
 	feature = om.NewOrderedMap()
-	if buff, err = os.ReadFile(path); err != nil {
+	if buff, err = io.ReadAll(reader); err != nil {
+		err = fmt.Errorf("failed to read feature definition: %w", err)
 		return
 	}
+
 	if err = json.Unmarshal(buff, feature); err != nil {
+		err = fmt.Errorf("failed to unmarshal feature definition: %w", err)
 		return
 	}
 	return 
@@ -109,7 +134,7 @@ func ReadFeatureDef(path string) (feature *om.OrderedMap, err error){
 
 // Writes the feature definition to a file
 // The function replaces all occurrences of "\u0026" with "&" in the JSON output
-func WriteFeatureDef(path string, feature *om.OrderedMap) (err error){
+func WriteFeatureDef(writer *bufio.Writer, feature *om.OrderedMap) (err error){
 	var (
 		buf bytes.Buffer
 		e   *json.Encoder
@@ -123,7 +148,8 @@ func WriteFeatureDef(path string, feature *om.OrderedMap) (err error){
 		return
 	}
 	res := bytes.ReplaceAll(buf.Bytes(), []byte("\\u0026"), []byte("&"))
-	if err = os.WriteFile(path, res, 0644); err != nil {
+	if _, err = writer.Write(res); err != nil {	
+		err = fmt.Errorf("failed to write feature definition: %w", err)
 		return
 	}
 	return 
@@ -131,11 +157,13 @@ func WriteFeatureDef(path string, feature *om.OrderedMap) (err error){
 
 // GetMethodBody generates the method body for a field in a feature definition
 func GetMethodBody(methodName string, featureName string, fieldName string) (body string) {
-	body = fmt.Sprintf(`
-    async %s(){
-        return await this.getSuperObjectFieldValue("%s", "%s");
-    }
-`, methodName, featureName, fieldName)
+	buff := bytes.NewBuffer([]byte{})
+	methodTemplate.Execute(buff, Method{
+		MethodName:  methodName,
+		FeatureName: featureName,	
+		FieldName:   fieldName,
+	})
+	body = buff.String()
 	return body
 
 }

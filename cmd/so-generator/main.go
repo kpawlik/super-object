@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -29,22 +30,37 @@ func init() {
 
 }	
 
+func readDef(path string) (def *om.OrderedMap, err error){
+	var file *os.File
+	file, err = os.OpenFile(path, os.O_RDWR, 0644)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	if def, err = so.ReadFeatureDef(bufio.NewReader(file)); err != nil {
+		err = fmt.Errorf("failed to read feature definition from %s: %w", path, err)
+		return	
+	}
+	return
+}
+
 func main() {
 	var (
 		err error
 		source *om.OrderedMap
 		compose *om.OrderedMap
 		fieldsNames = []string{}
+		file *os.File
 
 	)
 	sourcePath := flag.CommandLine.Lookup("source").Value.String()
 	destPath := flag.CommandLine.Lookup("dest").Value.String()
 	composePath := flag.CommandLine.Lookup("compose").Value.String()
-	if source, err = so.ReadFeatureDef(sourcePath); err != nil {
+	if source, err = readDef(sourcePath); err != nil {
 		log.Fatal(err)
 	}
 	so.AddDefaultGroup(source)
-	if compose, err = so.ReadFeatureDef(composePath); err != nil {
+	if compose, err = readDef(composePath); err != nil {
 		log.Fatal(err)
 	}
 	methodsPath := fmt.Sprintf("%s_methods.txt", destPath)
@@ -61,8 +77,13 @@ func main() {
 		fieldsNames = append(fieldsNames, calcFieldName)
 	}
 	so.AddGroup(source, composeExternalName, fieldsNames)
-	so.WriteFeatureDef(destPath, source)
-	file, err := os.OpenFile(methodsPath, os.O_APPEND|os.O_WRONLY, 0644)
+	file, err = os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatalf("failed to open file %s: %v", destPath, err)	
+	}
+	defer file.Close()
+	so.WriteFeatureDef(bufio.NewWriter(file), source)
+	file, err = os.OpenFile(methodsPath, os.O_APPEND|os.O_WRONLY, 0644)
 	if os.IsNotExist(err){
 		os.WriteFile(methodsPath, methods.Bytes(), 0644)
 	}else{
