@@ -31,3 +31,9 @@ go run main.go -source $DEFS/eo_connector_point_inst.def -compose $DEFS/eo_cable
 go run main.go -source $DEFS/eo_connector_point_inst_res.def -compose $DEFS/eo_cable_exi_phase.def -dest $DEFS/eo_connector_point_inst_res.def
 
 ```
+
+## TODO
+
+- [x] add new group only if not exists
+- [x] add new field only if not exists
+- [x] update existing field
