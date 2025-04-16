@@ -28,7 +28,7 @@ class StedSuperObject{{.ExternalName}} extends StedSuperObjectFeature  {
         this.prototype.so_configs = {
 			{{range .Relations}}
             "{{.FeatureName}}": {
-                "relation": "{{.Relation}}",
+                "relation": {{.Relation}},
             },
 			{{end}}
         }
