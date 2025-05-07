@@ -42,7 +42,7 @@ export default StedSuperObject{{.ExternalName}};
 `
 
 var setDataModelTemplate = `
-import {StedSuperObject{{.ExternalName}}} from "./stedSuperObject{{.ExternalName}}";
+import StedSuperObject{{.ExternalName}} from "./stedSuperObject{{.ExternalName}}";
 myw.featureModels["{{.InternalName}}"] = StedSuperObject{{.ExternalName}};
 `
 
@@ -121,15 +121,15 @@ func main() {
 		os.WriteFile(fmt.Sprintf(config.FileName, config.ExternalName), []byte(body), 0644)
 
 	}
-	dmbuff := bytes.NewBuffer([]byte{})
+	dmBuff := bytes.NewBuffer([]byte{})
 	for _, config := range configs{
 		
 		buff := bytes.NewBuffer([]byte{})	
 		dmTemplate.Execute(buff, config)
-		dmbuff.Write(buff.Bytes())
+		dmBuff.Write(buff.Bytes())
 
 	}
-	os.WriteFile("setDM.js", dmbuff.Bytes(), 0644)
+	os.WriteFile("setDM.js", dmBuff.Bytes(), 0644)
 	
 
 }

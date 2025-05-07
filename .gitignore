@@ -1,0 +1,13 @@
+cmd/js-generator/setDM.js
+cmd/js-generator/stedSuperObject3wTransformator.js
+cmd/js-generator/stedSuperObjectBeveiliging.js
+cmd/js-generator/stedSuperObjectEnergieregeling.js
+cmd/js-generator/stedSuperObjectInstallatiegeleider.js
+cmd/js-generator/stedSuperObjectMeettransformator.js
+cmd/js-generator/stedSuperObjectSchakelcomponent.js
+cmd/js-generator/stedSuperObjectTransformator.js
+cmd/so-generator/results.def
+cmd/so-generator/results.def_methods.txt
+cmd/test/
+cmd/test/test/methods.txt
+*.exe

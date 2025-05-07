@@ -4,9 +4,6 @@ OUTDIR=$WORKDIR/out
 GENPATH=/shared-data/bin/super-object/cmd/so-generator
 MYW_DB_NAME=iqgeo-test
 
-mkdir -p $TEMPDIR
-mkdir -p $OUTDIR
-
 function generate(){
     
     local main_feature_name=$1
@@ -29,39 +26,53 @@ function generate(){
     done
 }
 
+mkdir -p $TEMPDIR
+mkdir -p $OUTDIR
 
-## Kabel
-#features=(eo_cable_segment_inst eo_cable eo_cable_exi_phase)
-main_feature=eo_cable_segment_inst
-components=(eo_cable eo_cable_exi_phase)
+
+
+## Installatiegeleider
+main_feature=eo_connector_segment_inst
+components=(eo_connector_segment)
 generate $main_feature "${components[@]}"
 
-## Wire
-main_feature=eo_wire_segment_inst
-components=(eo_wire eo_wire_exi_phase)
+# Schakelinstallatie
+main_feature=eo_composite_switch
+components=(eo_composite_switch_spec eo_building)
 generate $main_feature "${components[@]}"
 
-## Koppeling
-main_feature=eo_connector_point_inst
-components=(eo_connector_point eo_connector_point_exi_phase)
+
+## 3wikkelingTransformator
+main_feature=eo_3w_power_xfrmr_inst
+components=(eo_3w_power_xfrmr eo_3w_power_xfrmr_controller)
 generate $main_feature "${components[@]}"
 
-## Aansluiting
-main_feature=eo_service_point
-components=(eo_service_connection)
+
+## Transformator
+main_feature=eo_power_xfrmr_inst
+components=(eo_power_xfrmr eo_power_xfrmr_controller)
 generate $main_feature "${components[@]}"
 
-## Station
-main_feature=sub_substation
-components=(sub_substation_boundary)
+
+## Meettransformator
+main_feature=eo_measuring_eqpt_inst
+components=(eo_measuring_eqpt)
 generate $main_feature "${components[@]}"
 
-## Kast
-main_feature=ed_cabinet
-components=(stedin_cabinet_spec)
+
+## Beveiliging
+main_feature=eo_protective_eqpt_inst
+components=(eo_protective_eqpt)
 generate $main_feature "${components[@]}"
 
-## Mast
-main_feature=ed_pole
-components=(ed_cross_arm ed_insulator ed_riser)
+
+## Schakelcomponent
+main_feature=eo_isolating_eqpt_inst
+components=(eo_isolating_eqpt eo_isolating_eqpt_controller)
+generate $main_feature "${components[@]}"
+
+
+## Energieregeling
+main_feature=eo_regulating_eqpt_inst
+components=(eo_regulating_eqpt)
 generate $main_feature "${components[@]}"
