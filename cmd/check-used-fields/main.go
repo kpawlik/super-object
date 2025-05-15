@@ -56,7 +56,12 @@ func main() {
 		fieldsToRemove[feature] = append(fieldsToRemove[feature], fmt.Sprintf("'%s'", field))
 	} 
 	for feature, fields := range fieldsToRemove {
-		fmt.Printf(sql, feature, strings.Join(fields, ", "))
+		sqlStr := fmt.Sprintf(sql, feature, strings.Join(fields, ", "))
+		fmt.Printf("echo %s\n", feature)
+		fmt.Printf("echo \"%s\"\n", sqlStr)
+		fmt.Printf("psql -d %s -c \"%s\"\n", databaseName, sqlStr)
+		fmt.Printf("echo \"=======\"\n")
 		fmt.Println()	
+
 	}
 }

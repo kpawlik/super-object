@@ -26,9 +26,9 @@ go run cmd/so-generator/main.go
 
 ```bash
 # init source + component
-go run main.go -source $DEFS/eo_connector_point_inst.def -compose $DEFS/eo_cable.def -dest $DEFS/eo_connector_point_inst_res.def
+go run cmd/so-generator/main.go -source $DEFS/eo_connector_point_inst.def -compose $DEFS/eo_cable.def -dest $DEFS/eo_connector_point_inst_res.def
 # result + second component
-go run main.go -source $DEFS/eo_connector_point_inst_res.def -compose $DEFS/eo_cable_exi_phase.def -dest $DEFS/eo_connector_point_inst_res.def
+go run cmd/so-generator/main.go -source $DEFS/eo_connector_point_inst_res.def -compose $DEFS/eo_cable_exi_phase.def -dest $DEFS/eo_connector_point_inst_res.def
 
 ```
 
