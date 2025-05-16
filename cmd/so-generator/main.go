@@ -81,7 +81,7 @@ func main() {
 		featureName := f.FeatureName
 		calcFieldName := fmt.Sprintf("calc__%s__%s", featureName, fieldName)
 		if so.IsFieldExists(source, calcFieldName) {
-			so.UpdateField(source, calcFieldName, f.ExternalName, f.Type)
+			so.UpdateField(source, calcFieldName, f.ExternalName, f.Type, f.Unit)
 			method := so.GetMethodBody(calcFieldName, featureName, fieldName)
 			methods.WriteString(method)
 		}else{

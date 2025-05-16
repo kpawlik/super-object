@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	DefaultExcludedFields    = []string{"reference_set", "reference", "linestring", "point", "polygon"}
-	GeomExcludedFields       = []string{"linestring", "point", "polygon"}
-	methodTemplateText = `
+	DefaultExcludedFields = []string{"reference_set", "reference", "linestring", "point", "polygon"}
+	GeomExcludedFields    = []string{"linestring", "point", "polygon"}
+	methodTemplateText    = `
 	/**
 	 Method for calculated field. 
 	 @returns {any} value of field {{.FieldName}} from feature {{.FeatureName}}
@@ -35,10 +35,11 @@ type Method struct {
 }
 
 type Field struct {
-	FeatureName string
-	Name string
+	FeatureName  string
+	Name         string
 	ExternalName string
-	Type string
+	Type         string
+	Unit         string
 }
 
 func init() {
@@ -63,12 +64,15 @@ func IsFieldExists(featureDef *om.OrderedMap, fieldName string) bool {
 // fieldName: the name of the field to add
 // externalName: the external name of the field to add
 // fieldType: the type of the field to add
-func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, fieldType string) {
+func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, fieldType string, unit string) {
 	field := om.NewOrderedMap()
 	field.Set("name", fieldName)
 	field.Set("external_name", externalName)
 	field.Set("type", fieldType)
 	field.Set("value", fmt.Sprintf("method(%s)", fieldName))
+	if unit != "" {
+		field.Set("unit", unit)
+	}
 	fields := featureDef.Map["fields"].([]any)
 	fields = append(fields, field)
 	featureDef.Set("fields", fields)
@@ -79,7 +83,7 @@ func AddField(featureDef *om.OrderedMap, fieldName string, externalName string, 
 // fieldName: the name of the field to add
 // externalName: the external name of the field to add
 // fieldType: the type of the field to add
-func UpdateField(featureDef *om.OrderedMap, fieldName string, externalName string, fieldType string) {
+func UpdateField(featureDef *om.OrderedMap, fieldName string, externalName string, fieldType string, unit string) {
 	fields := featureDef.Map["fields"].([]any)
 	for i, iField := range fields {
 		field := iField.(*om.OrderedMap)
@@ -87,6 +91,9 @@ func UpdateField(featureDef *om.OrderedMap, fieldName string, externalName strin
 			field.Set("external_name", externalName)
 			field.Set("type", fieldType)
 			field.Set("value", fmt.Sprintf("method(%s)", fieldName))
+			if unit != "" {
+				field.Set("unit", unit)
+			}
 			fields[i] = field
 		}
 	}
@@ -106,26 +113,8 @@ func IsGroupExists(featureDef *om.OrderedMap, groupName string) bool {
 	return false
 }
 
-// func AddDefaultGroup(featureDef *om.OrderedMap) {
-// 	groups := featureDef.Map["groups"].([]any)
-// 	if len(groups) == 0 {
-// 		defaultFields := GetFields(featureDef, GeomExcludedFields)
-// 		fieldNames := make([]string, len(defaultFields))
-// 		for i, field := range defaultFields {
-// 			fieldNames[i] = field["name"]
-// 		}
-// 		defaultGroup := om.NewOrderedMap()
-// 		defaultGroup.Set("name", "Default")
-// 		defaultGroup.Set("visible", true)
-// 		defaultGroup.Set("expanded", false)
-// 		defaultGroup.Set("fields", fieldNames)
-// 		groups = append(groups, defaultGroup)
-// 		featureDef.Set("groups", groups)
-// 	}
-// }
-
-//AddGroup adds a new group to the feature definition
-// featureDef: the feature definition to add the group to	
+// AddGroup adds a new group to the feature definition
+// featureDef: the feature definition to add the group to
 // groupName: the name of the group to add
 // fields: list of fields to add to group
 func AddGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
@@ -139,7 +128,7 @@ func AddGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
 	featureDef.Set("groups", groups)
 }
 
-// UpdateGroup 
+// UpdateGroup
 func UpdateGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
 	groups := featureDef.Map["groups"].([]any)
 	for i, iGroup := range groups {
@@ -152,7 +141,6 @@ func UpdateGroup(featureDef *om.OrderedMap, groupName string, fields []string) {
 	}
 	featureDef.Set("groups", groups)
 }
-
 
 // Get list of fields from feature definition. Exclude fields with prefix "myw_"
 // and fields with type "reference_set", "reference", "linestring", "point", "polygon"
@@ -173,11 +161,16 @@ func GetFields(featureDef *om.OrderedMap, excluded []string) (fields []Field) {
 		if slices.Contains(excluded, fieldType) {
 			continue
 		}
+		unitValue := ""
+		if unit := field.Map["unit"]; unit != nil {
+			unitValue = unit.(string)
+		}
 		fields = append(fields, Field{
-			FeatureName: featureName,
-			Name: 	  fieldName,
+			FeatureName:  featureName,
+			Name:         fieldName,
 			ExternalName: externalName,
-			Type: 	  fieldType,
+			Type:         fieldType,
+			Unit:         unitValue,
 		})
 	}
 	return fields
