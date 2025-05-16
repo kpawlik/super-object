@@ -85,7 +85,7 @@ func main() {
 			method := so.GetMethodBody(calcFieldName, featureName, fieldName)
 			methods.WriteString(method)
 		}else{
-			so.AddField(source, calcFieldName, f.ExternalName, f.Type)
+			so.AddField(source, calcFieldName, f.ExternalName, f.Type, f.Unit)
 		}
 		fieldsNames = append(fieldsNames, calcFieldName)
 	}
